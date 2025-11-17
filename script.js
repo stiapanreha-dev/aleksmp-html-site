@@ -10,14 +10,56 @@
   // Sticky header shadow on scroll
   const onScroll = () => {
     if (window.scrollY > 10) {
-      header.style.boxShadow = '0 6px 24px rgba(0,0,0,.35)';
-      header.style.background = 'rgba(15,15,16,.75)';
+      header.style.boxShadow = '0 6px 24px rgba(59,130,246,.25)';
+      header.style.background = 'rgba(15,15,16,.85)';
     } else {
       header.style.boxShadow = 'none';
       header.style.background = 'transparent';
     }
   };
   onScroll(); window.addEventListener('scroll', onScroll);
+
+  // Intersection Observer for scroll animations
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, observerOptions);
+
+  // Add fade-in animations to sections
+  document.querySelectorAll('.section h2, .card, .feature, .gallery__item').forEach(el => {
+    el.classList.add('fade-in');
+    observer.observe(el);
+  });
+
+  // Active section indicator in navigation
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav__menu a[href^="#"]');
+
+  const navObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(link => {
+          link.style.color = '';
+          link.style.background = '';
+          if (link.getAttribute('href') === `#${id}`) {
+            link.style.color = '#60a5fa';
+            link.style.background = 'rgba(59,130,246,.1)';
+          }
+        });
+      }
+    });
+  }, { threshold: 0.5 });
+
+  sections.forEach(section => navObserver.observe(section));
 
   // Mobile menu toggle
   if (navBtn) {
@@ -81,31 +123,79 @@
   modalClose.addEventListener('click', closeModal);
   modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
 
-  // Basic form validation (example)
-  const form = document.getElementById('quote-form');
-  form.addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const phone = form.phone.value.trim();
-    if(!phone){
-      alert('Пожалуйста, укажите телефон для связи.');
-      form.phone.focus();
-      return;
+  // Phone mask function
+  const phoneMask = (input) => {
+    input.addEventListener('input', (e) => {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.startsWith('7')) val = val.substring(1);
+      if (val.length > 0) val = '+7 (' + val;
+      if (val.length > 7) val = val.substring(0, 7) + ') ' + val.substring(7);
+      if (val.length > 13) val = val.substring(0, 13) + '-' + val.substring(13);
+      if (val.length > 16) val = val.substring(0, 16) + '-' + val.substring(16, 18);
+      e.target.value = val;
+    });
+  };
+
+  // Apply phone mask
+  document.querySelectorAll('input[type="tel"]').forEach(phoneMask);
+
+  // Enhanced form validation
+  const validateForm = (form) => {
+    const phone = form.querySelector('input[type="tel"]');
+    const name = form.querySelector('input[name="name"]');
+    let valid = true;
+
+    if (phone && phone.value.replace(/\D/g, '').length < 11) {
+      phone.style.borderColor = '#ef4444';
+      valid = false;
+    } else if (phone) {
+      phone.style.borderColor = '#10b981';
     }
-    alert('Спасибо! Заявка отправлена (демо).');
-    form.reset();
+
+    if (name && name.value.trim().length < 2) {
+      name.style.borderColor = '#ef4444';
+      valid = false;
+    } else if (name) {
+      name.style.borderColor = '#10b981';
+    }
+
+    return valid;
+  };
+
+  // Show success message
+  const showSuccess = (form) => {
+    let successMsg = form.querySelector('.form__success');
+    if (!successMsg) {
+      successMsg = document.createElement('div');
+      successMsg.className = 'form__success';
+      successMsg.textContent = '✓ Спасибо! Ваша заявка отправлена. Мы свяжемся с вами в ближайшее время.';
+      form.appendChild(successMsg);
+    }
+    successMsg.style.display = 'block';
+    setTimeout(() => {
+      successMsg.style.display = 'none';
+      form.reset();
+    }, 5000);
+  };
+
+  // Main form submission
+  const form = document.getElementById('quote-form');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (validateForm(form)) {
+      showSuccess(form);
+    }
   });
 
+  // Quick quote form submission
   const quick = document.getElementById('quick-quote');
-  quick.addEventListener('submit', (e)=>{
+  quick.addEventListener('submit', (e) => {
     e.preventDefault();
-    const phone = quick.qphone.value.trim();
-    if(!phone){
-      alert('Укажите номер телефона.');
-      quick.qphone.focus();
-      return;
+    if (validateForm(quick)) {
+      showSuccess(quick);
+      setTimeout(() => {
+        modal.setAttribute('aria-hidden', 'true');
+      }, 2000);
     }
-    alert('Спасибо! Мы перезвоним (демо).');
-    quick.reset();
-    modal.setAttribute('aria-hidden','true');
   });
 })();
