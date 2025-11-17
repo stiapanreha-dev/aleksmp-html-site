@@ -10,8 +10,8 @@
   // Sticky header shadow on scroll
   const onScroll = () => {
     if (window.scrollY > 10) {
-      header.style.boxShadow = '0 6px 24px rgba(59,130,246,.25)';
-      header.style.background = 'rgba(15,15,16,.85)';
+      header.style.boxShadow = '0 6px 24px rgba(0,0,0,.6)';
+      header.style.background = 'rgba(10,10,11,.9)';
     } else {
       header.style.boxShadow = 'none';
       header.style.background = 'transparent';
@@ -51,8 +51,11 @@
           link.style.color = '';
           link.style.background = '';
           if (link.getAttribute('href') === `#${id}`) {
-            link.style.color = '#60a5fa';
-            link.style.background = 'rgba(59,130,246,.1)';
+            link.style.color = '#ffffff';
+            link.style.background = 'rgba(255,255,255,.08)';
+            link.style.boxShadow = '0 0 12px rgba(255,255,255,.15)';
+          } else {
+            link.style.boxShadow = '';
           }
         });
       }
@@ -146,17 +149,21 @@
     let valid = true;
 
     if (phone && phone.value.replace(/\D/g, '').length < 11) {
-      phone.style.borderColor = '#ef4444';
+      phone.style.borderColor = '#71717a';
+      phone.style.background = 'rgba(255,0,0,.05)';
       valid = false;
     } else if (phone) {
-      phone.style.borderColor = '#10b981';
+      phone.style.borderColor = '#ffffff';
+      phone.style.background = 'rgba(255,255,255,.05)';
     }
 
     if (name && name.value.trim().length < 2) {
-      name.style.borderColor = '#ef4444';
+      name.style.borderColor = '#71717a';
+      name.style.background = 'rgba(255,0,0,.05)';
       valid = false;
     } else if (name) {
-      name.style.borderColor = '#10b981';
+      name.style.borderColor = '#ffffff';
+      name.style.background = 'rgba(255,255,255,.05)';
     }
 
     return valid;
